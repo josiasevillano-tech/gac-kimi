@@ -259,3 +259,54 @@ class CrosswordGenerator:
             direccion=Horizontal()
         )
         board.colocar(placement)
+
+    def generar(self, board: Board, palabras: list[str]) -> bool:
+        """
+        Intenta colocar todas las palabras en el tablero usando backtracking.
+
+        1. Ordena palabras de mas larga a mas corta.
+        2. Coloca la primera en el centro.
+        3. Para cada palabra restante, prueba posiciones validas.
+        4. Si una rama falla, retrocede (backtrack) y prueba otra.
+        5. Devuelve True si logro colocar todas, False si es imposible.
+        """
+        if not palabras:
+            return False
+
+        palabras = [p.upper() for p in palabras]
+        palabras_ordenadas = sorted(palabras, key=len, reverse=True)
+
+        # Limpiar tablero por si acaso
+        board.limpiar()
+
+        # Colocar la primera palabra en el centro
+        primera = palabras_ordenadas[0]
+        self.colocar_primera_palabra(board, primera)
+
+        # Intentar colocar el resto recursivamente
+        resto = palabras_ordenadas[1:]
+        exito = self._backtrack(board, resto, 0)
+
+        if not exito:
+            # Si fallo, dejar el tablero limpio (no dejar palabras a medias)
+            board.limpiar()
+
+        return exito
+
+    def _backtrack(self, board: Board, palabras: list[str], indice: int) -> bool:
+        """
+        Recursivamente intenta colocar palabras[indice] y las siguientes.
+        """
+        if indice >= len(palabras):
+            return True  # Todas las palabras fueron colocadas
+
+        palabra = palabras[indice]
+        posiciones = self.encontrar_posiciones_validas(board, palabra)
+
+        for pos in posiciones:
+            board.colocar(pos)
+            if self._backtrack(board, palabras, indice + 1):
+                return True
+            board.quitar(pos)  # Backtrack: deshacer esta eleccion
+
+        return False  # Ninguna posicion funciono para esta palabra

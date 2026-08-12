@@ -157,3 +157,81 @@ def test_colocar_primera_palabra_en_centro():
     assert p.fila == 5
     assert p.columna == 1
     assert isinstance(p.direccion, Horizontal)
+
+    
+
+# -------------------------------------------
+# PRUEBA 6: Backtracking — resolver crucigrama
+# -------------------------------------------
+
+def test_generar_crucigrama_de_tres_palabras():
+    """
+    SOL, SAL y LUZ pueden formar un crucigrama valido.
+    SOL horizontal, SAL vertical cruza en la S, LUZ vertical cruza en la L.
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    resultado = gen.generar(tablero, ["SOL", "SAL", "LUZ"])
+    assert resultado is True
+    assert len(tablero.placements) == 3
+
+
+def test_generar_con_palabras_incompatibles():
+    """
+    Palabras que no comparten ninguna letra no pueden cruzarse.
+    El generador debe devolver False.
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    resultado = gen.generar(tablero, ["ABC", "DEF", "GHI"])
+    assert resultado is False
+
+
+def test_generar_tablero_vacio_si_falla():
+    """
+    Si generar() devuelve False, el tablero debe quedar vacio
+    (no deja palabras a medias).
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    gen.generar(tablero, ["ABC", "DEF", "GHI"])
+    assert len(tablero.placements) == 0
+
+    
+
+# -------------------------------------------
+# PRUEBA 6: Backtracking — resolver crucigrama
+# -------------------------------------------
+
+def test_generar_crucigrama_de_tres_palabras():
+    """
+    SOL, SAL y LUZ pueden formar un crucigrama valido.
+    SOL horizontal, SAL vertical cruza en la S, LUZ vertical cruza en la L.
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    resultado = gen.generar(tablero, ["SOL", "SAL", "LUZ"])
+    assert resultado is True
+    assert len(tablero.placements) == 3
+
+
+def test_generar_con_palabras_incompatibles():
+    """
+    Palabras que no comparten ninguna letra no pueden cruzarse.
+    El generador debe devolver False.
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    resultado = gen.generar(tablero, ["ABC", "DEF", "GHI"])
+    assert resultado is False
+
+
+def test_generar_tablero_vacio_si_falla():
+    """
+    Si generar() devuelve False, el tablero debe quedar vacio
+    (no deja palabras a medias).
+    """
+    tablero = Board(filas=10, columnas=10)
+    gen = CrosswordGenerator()
+    gen.generar(tablero, ["ABC", "DEF", "GHI"])
+    assert len(tablero.placements) == 0
