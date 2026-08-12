@@ -163,6 +163,20 @@ class CrosswordGenerator:
 
         return False
 
+        # -- Puntuacion de posiciones --
+
+    def _puntuar_posicion(self, board: Board, placement: Placement) -> int:
+        """
+        Cuantas casillas de este placement cruzan con palabras ya puestas?
+        Cada cruce (casilla ocupada con la MISMA letra) vale 1 punto.
+        Mas puntos = mejor posicion (mas conectada al crucigrama existente).
+        """
+        puntuacion = 0
+        for idx, (f, c) in enumerate(placement.posiciones()):
+            if board.esta_ocupada(f, c) and board.celda(f, c) == placement.palabra[idx]:
+                puntuacion += 1
+        return puntuacion
+
     # -- Metodo principal de validacion --
 
     def es_posicion_valida(
@@ -243,6 +257,8 @@ class CrosswordGenerator:
                             Placement(palabra, fila=f, columna=c, direccion=direccion)
                         )
 
+        # Ordenar por puntuacion: mas cruces primero
+        posiciones.sort(key=lambda p: self._puntuar_posicion(board, p), reverse=True)
         return posiciones
 
     def colocar_primera_palabra(self, board: Board, palabra: str) -> None:
