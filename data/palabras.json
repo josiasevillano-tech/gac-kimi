@@ -1,0 +1,29 @@
+{
+  "palabras": [
+    {"palabra": "SOL", "definicion": "Estrella que ilumina el dia"},
+    {"palabra": "LUNA", "definicion": "Satelite natural de la Tierra"},
+    {"palabra": "CASA", "definicion": "Lugar donde se vive"},
+    {"palabra": "MESA", "definicion": "Mueble con patas y superficie plana"},
+    {"palabra": "SILLA", "definicion": "Asiento con respaldo"},
+    {"palabra": "LIBRO", "definicion": "Conjunto de hojas escritas"},
+    {"palabra": "AGUA", "definicion": "Liquido transparente esencial para la vida"},
+    {"palabra": "FUEGO", "definicion": "Combustion que produce luz y calor"},
+    {"palabra": "TIERRA", "definicion": "Planeta donde vivimos"},
+    {"palabra": "AIRE", "definicion": "Mezcla de gases que respiramos"},
+    {"palabra": "ARBOL", "definicion": "Planta de tronco leñoso"},
+    {"palabra": "FLOR", "definicion": "Parte colorida de la planta"},
+    {"palabra": "NUBE", "definicion": "Masa visible de vapor de agua"},
+    {"palabra": "LLUVIA", "definicion": "Precipitacion de gotas de agua"},
+    {"palabra": "ESTRELLA", "definicion": "Cuerpo celeste que brilla en el cielo"},
+    {"palabra": "MAR", "definicion": "Gran extension de agua salada"},
+    {"palabra": "RIO", "definicion": "Corriente natural de agua dulce"},
+    {"palabra": "MONTANA", "definicion": "Gran elevacion de terreno"},
+    {"palabra": "CAMINO", "definicion": "Via para transitar"},
+    {"palabra": "PUERTA", "definicion": "Abertura para entrar y salir"},
+    {"palabra": "VENTANA", "definicion": "Abertura en la pared para luz"},
+    {"palabra": "CIELO", "definicion": "Espacio que vemos sobre nosotros"},
+    {"palabra": "PAJARO", "definicion": "Animal con plumas y alas"},
+    {"palabra": "PERRO", "definicion": "Animal domestico leal"},
+    {"palabra": "GATO", "definicion": "Animal domestico independiente"}
+  ]
+}

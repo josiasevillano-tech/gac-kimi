@@ -91,3 +91,27 @@ def test_render_sin_numerador_no_muestra_span():
     renderer = HtmlRenderer()
     html = renderer.render(board)
     assert '<span class="cell-number">' not in html
+
+
+def test_render_con_pistas_muestra_panel():
+    """Si se proporcionan pistas, aparece el panel lateral."""
+    board = Board(5, 5)
+    board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
+    renderer = HtmlRenderer()
+    numerador = PistaNumerador()
+    pistas = {
+        1: {"palabra": "SOL", "definicion": "Estrella del dia", "direccion": "Horizontal"}
+    }
+    html = renderer.render(board, numerador=numerador, pistas=pistas)
+    assert '<div class="pistas-panel">' in html
+    assert "Horizontales" in html
+    assert "Estrella del dia" in html
+
+
+def test_render_sin_pistas_no_muestra_panel():
+    """Sin pistas, no aparece el div del panel lateral (solo la clase CSS en el style)."""
+    board = Board(5, 5)
+    board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
+    renderer = HtmlRenderer()
+    html = renderer.render(board)
+    assert '<div class="pistas-panel">' not in html

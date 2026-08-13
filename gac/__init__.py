@@ -4,7 +4,7 @@ gac/__init__.py
 Paquete del Generador Automatico de Crucigramas (GAC).
 
 Exporta las piezas principales del dominio para que el usuario pueda hacer:
-    from gac import Board, CrosswordGenerator, HtmlRenderer, PistaNumerador
+    from gac import Board, CrosswordGenerator, HtmlRenderer, PistaNumerador, DiccionarioCrucigrama
 """
 
 from .direction import Direction, Horizontal, Vertical
@@ -13,6 +13,7 @@ from .board import Board
 from .generator import CrosswordGenerator
 from .renderer import HtmlRenderer
 from .pistas import PistaNumerador
+from .diccionario import DiccionarioCrucigrama
 
 __all__ = [
     "Direction",
@@ -23,4 +24,5 @@ __all__ = [
     "CrosswordGenerator",
     "HtmlRenderer",
     "PistaNumerador",
+    "DiccionarioCrucigrama",
 ]

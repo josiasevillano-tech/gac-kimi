@@ -21,21 +21,22 @@ class HtmlRenderer:
         self,
         board: Board,
         titulo: str = "Crucigrama GAC",
-        numerador: PistaNumerador | None = None
+        numerador: PistaNumerador | None = None,
+        pistas: dict[int, dict] | None = None
     ) -> str:
         """
         Genera el HTML completo que representa el tablero.
 
-        Si se proporciona un PistaNumerador, muestra los numeros de pista
-        en la esquina superior izquierda de cada casilla inicial.
-
-        Solo muestra la region que contiene palabras, con un margen
-        de 1 celda alrededor para que no quede pegado al borde.
+        Args:
+            board: El tablero a renderizar.
+            titulo: Titulo del crucigrama.
+            numerador: Si se proporciona, muestra numeros de pista.
+            pistas: Diccionario {numero: {"palabra": ..., "definicion": ..., "direccion": ...}}
+                    Si se proporciona, muestra la lista de pistas.
         """
         if not board.placements:
             return self._html_vacio(titulo)
 
-        # Numeros de pista por celda (si hay numerador)
         numeros: dict[tuple[int, int], int] = {}
         if numerador is not None:
             numeros = numerador.numeros_por_celda(board)
@@ -76,6 +77,25 @@ class HtmlRenderer:
 
         celdas_str = "\n".join(celdas_html)
 
+        # Generar lista de pistas si se proporcionan
+        pistas_html = ""
+        if pistas:
+            horizontales = []
+            verticales = []
+            for num, info in sorted(pistas.items()):
+                linea = f'<li><strong>{num}.</strong> {info["definicion"]}</li>'
+                if info.get("direccion", "").lower() == "horizontal":
+                    horizontales.append(linea)
+                else:
+                    verticales.append(linea)
+
+            pistas_html = '<div class="pistas-panel">'
+            if horizontales:
+                pistas_html += '<div class="pistas-grupo"><h3>Horizontales</h3><ul>' + "".join(horizontales) + '</ul></div>'
+            if verticales:
+                pistas_html += '<div class="pistas-grupo"><h3>Verticales</h3><ul>' + "".join(verticales) + '</ul></div>'
+            pistas_html += '</div>'
+
         return """<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -99,6 +119,13 @@ h1 {
     margin-bottom: 20px;
     font-size: 28px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.main-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: center;
+    align-items: flex-start;
 }
 .board-container {
     background: #222;
@@ -144,19 +171,58 @@ h1 {
     line-height: 1;
     pointer-events: none;
 }
+.pistas-panel {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    max-width: 320px;
+    min-width: 260px;
+}
+.pistas-panel h3 {
+    color: #1e3c72;
+    margin-bottom: 10px;
+    font-size: 18px;
+    border-bottom: 2px solid #2a5298;
+    padding-bottom: 4px;
+}
+.pistas-grupo {
+    margin-bottom: 16px;
+}
+.pistas-grupo ul {
+    list-style: none;
+    padding: 0;
+}
+.pistas-grupo li {
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.pistas-grupo li:last-child {
+    border-bottom: none;
+}
 .info {
     color: rgba(255,255,255,0.7);
     margin-top: 16px;
     font-size: 14px;
 }
+@media (max-width: 768px) {
+    .main-container { flex-direction: column; align-items: center; }
+    .pistas-panel { max-width: 100%; width: 100%; }
+}
 </style>
 </head>
 <body>
 <h1>""" + titulo + """</h1>
+<div class="main-container">
 <div class="board-container">
 <div class="board">
 """ + celdas_str + """
 </div>
+</div>
+""" + pistas_html + """
 </div>
 <p class="info">Generado con GAC KIMI — """ + str(len(board.placements)) + """ palabras</p>
 </body>
