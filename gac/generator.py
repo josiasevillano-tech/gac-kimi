@@ -43,7 +43,7 @@ class CrosswordGenerator:
         """
         return max(a_inicio, b_inicio) <= min(a_fin, b_fin)
 
-    # -- Regla: Paralelismo pegado --
+    # -- Regla 4: Paralelismo pegado --
 
     def _hay_paralelismo_pegado(self, board: Board, placement_nuevo: Placement) -> bool:
         """
@@ -92,7 +92,7 @@ class CrosswordGenerator:
 
         return False
 
-    # -- Regla: Continuidad ilegal --
+    # -- Regla 5: Continuidad ilegal --
 
     def _hay_continuidad_ilegal(self, board: Board, placement_nuevo: Placement) -> bool:
         """
@@ -163,7 +163,51 @@ class CrosswordGenerator:
 
         return False
 
-        # -- Puntuacion de posiciones --
+    # -- Regla 6: Subpalabras de 2 letras --
+
+    def _hay_subpalabra_dos_letras(self, board: Board, placement_nuevo: Placement) -> bool:
+        """
+        Evita que se formen palabras fantasma de exactamente 2 letras
+        en la direccion perpendicular a la palabra nueva.
+
+        Para cada casilla que ocupara la palabra nueva, cuenta cuantas letras
+        consecutivas hay en la direccion perpendicular (incluyendo la casilla).
+        Si hay exactamente 2, es invalido porque forma una subpalabra fantasma.
+
+        Ejemplo invalido:
+            SAL vertical en col 2, filas 2-3: A(2,2), L(3,2)
+            SOL horizontal en fila 3, cols 0-2: S(3,0), O(3,1), L(3,2)
+            -> En (3,2), verticalmente hay solo A-L = 2 letras. Invalido.
+        """
+        es_h = placement_nuevo.direccion.es_horizontal()
+
+        # Direccion perpendicular: si es horizontal, miramos verticalmente
+        df, dc = (1, 0) if es_h else (0, 1)
+
+        for f, c in placement_nuevo.posiciones():
+            # La casilla (f,c) tendra letra despues de colocar la palabra nueva
+            conteo = 1
+
+            # Explorar hacia un lado en la direccion perpendicular
+            ff, cc = f + df, c + dc
+            while board.esta_dentro(ff, cc) and not board.esta_vacia(ff, cc):
+                conteo += 1
+                ff += df
+                cc += dc
+
+            # Explorar hacia el otro lado
+            ff, cc = f - df, c - dc
+            while board.esta_dentro(ff, cc) and not board.esta_vacia(ff, cc):
+                conteo += 1
+                ff -= df
+                cc -= dc
+
+            if conteo == 2:
+                return True
+
+        return False
+
+    # -- Puntuacion de posiciones --
 
     def _puntuar_posicion(self, board: Board, placement: Placement) -> int:
         """
@@ -196,6 +240,7 @@ class CrosswordGenerator:
         3. Si ya hay palabras, la nueva debe CRUZARSE con al menos una.
         4. NO hay paralelismo pegado con palabras existentes.
         5. NO hay continuidad ilegal con palabras existentes.
+        6. NO se forman subpalabras fantasma de 2 letras.
         """
         palabra = palabra.upper()
         recorrido = list(direccion.recorrido(fila, columna, len(palabra)))
@@ -234,6 +279,10 @@ class CrosswordGenerator:
 
         # Regla 5: Continuidad ilegal?
         if self._hay_continuidad_ilegal(board, placement_candidato):
+            return False
+
+        # Regla 6: Subpalabras de 2 letras?
+        if self._hay_subpalabra_dos_letras(board, placement_candidato):
             return False
 
         return True

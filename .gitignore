@@ -1,31 +1,4 @@
-# Archivos de Python que no necesitan ir a GitHub
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-
-# Entornos virtuales
-venv/
-env/
-ENV/
-
-# IDEs y editores
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Sistema operativo
-.DS_Store
-Thumbs.db
-
-# Pruebas y cobertura
+﻿__pycache__/
+*.pyc
 .pytest_cache/
-.coverage
-htmlcov/
-
-# Archivos de salida temporales
-*.tmp
-*.log
+output/
