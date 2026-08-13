@@ -1,15 +1,14 @@
 """
 scripts/web_viewer.py
 =====================
-Visualizador web de crucigramas.
+Visualizador web de crucigramas interactivos.
 
 Uso:
     python scripts/web_viewer.py SOL LUZ CASA MESA
-    python scripts/web_viewer.py --aleatorio 10    (elige 10 palabras del diccionario)
-    python scripts/web_viewer.py                   (pide palabras interactivamente)
+    python scripts/web_viewer.py --aleatorio 22
+    python scripts/web_viewer.py
 
 Genera output/crucigrama.html y lo abre en el navegador.
-No requiere dependencias externas.
 """
 
 import sys
@@ -28,36 +27,45 @@ def main():
     print("=" * 50)
     print()
 
-    # Detectar modo aleatorio
-    if len(sys.argv) > 1 and sys.argv[1] == "--aleatorio":
-        cantidad = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+    args = sys.argv[1:]
+    modo_aleatorio = "--aleatorio" in args
+    args_limpios = [a for a in args if a != "--aleatorio"]
+
+    if modo_aleatorio:
+        cantidad = int(args_limpios[0]) if args_limpios else 22
         ruta_diccionario = Path(__file__).parent.parent / 'data' / 'palabras.json'
         try:
             diccionario = DiccionarioCrucigrama(ruta_diccionario)
             seleccion = diccionario.seleccionar_para_tablero(cantidad, min_long=3, max_long=12)
-            palabras = [p["palabra"] for p in seleccion]
-            definiciones = {p["palabra"]: p["definicion"] for p in seleccion}
-            print(f"Seleccionadas {cantidad} palabras del diccionario.")
+            palabras = []
+            definiciones = {}
+            for p in seleccion:
+                palabras.append(p["palabra"])
+                definiciones[p["palabra"]] = p["definicion"]
+            print("Seleccionadas " + str(cantidad) + " palabras del diccionario.")
         except FileNotFoundError:
-            print(f"No se encontro el diccionario en: {ruta_diccionario}")
+            print("No se encontro el diccionario en: " + str(ruta_diccionario))
             return
-    elif len(sys.argv) > 1:
-        palabras = sys.argv[1:]
+    elif args_limpios:
+        palabras = args_limpios
         definiciones = {}
     else:
         entrada = input("Ingresa las palabras separadas por espacio (o 'aleatorio N'): ")
         if entrada.strip().lower().startswith("aleatorio"):
             partes = entrada.strip().split()
-            cantidad = int(partes[1]) if len(partes) > 1 else 10
+            cantidad = int(partes[1]) if len(partes) > 1 else 22
             ruta_diccionario = Path(__file__).parent.parent / 'data' / 'palabras.json'
             try:
                 diccionario = DiccionarioCrucigrama(ruta_diccionario)
                 seleccion = diccionario.seleccionar_para_tablero(cantidad, min_long=3, max_long=12)
-                palabras = [p["palabra"] for p in seleccion]
-                definiciones = {p["palabra"]: p["definicion"] for p in seleccion}
-                print(f"Seleccionadas {cantidad} palabras del diccionario.")
+                palabras = []
+                definiciones = {}
+                for p in seleccion:
+                    palabras.append(p["palabra"])
+                    definiciones[p["palabra"]] = p["definicion"]
+                print("Seleccionadas " + str(cantidad) + " palabras del diccionario.")
             except FileNotFoundError:
-                print(f"No se encontro el diccionario en: {ruta_diccionario}")
+                print("No se encontro el diccionario en: " + str(ruta_diccionario))
                 return
         else:
             palabras = entrada.strip().split()
@@ -67,9 +75,9 @@ def main():
         print("No se ingresaron palabras.")
         return
 
-    print(f"Generando crucigrama con: {palabras}")
+    print("Generando crucigrama con: " + str(palabras))
 
-    board = Board(15, 15)
+    board = Board(20, 20)
     gen = CrosswordGenerator()
     exito = gen.generar(board, palabras)
 
@@ -77,11 +85,9 @@ def main():
         print("No se pudo generar el crucigrama con esas palabras.")
         return
 
-    # Numerar pistas
     numerador = PistaNumerador()
     asignaciones = numerador.numerar(board)
 
-    # Construir diccionario de pistas para el renderer
     pistas_render = {}
     for placement, numero in asignaciones.items():
         direccion_str = "Horizontal" if placement.direccion.es_horizontal() else "Vertical"
@@ -97,7 +103,8 @@ def main():
         board,
         titulo="Crucigrama GAC",
         numerador=numerador,
-        pistas=pistas_render if definiciones else None
+        pistas=pistas_render if definiciones else None,
+        interactivo=True
     )
 
     output_dir = Path(__file__).parent.parent / 'output'
@@ -107,7 +114,7 @@ def main():
     with open(ruta_html, 'w', encoding='utf-8') as f:
         f.write(html)
 
-    print(f"Crucigrama guardado en: {ruta_html}")
+    print("Crucigrama guardado en: " + str(ruta_html))
     print("Abriendo en el navegador...")
 
     webbrowser.open(ruta_html.as_uri())

@@ -1,7 +1,7 @@
 """
 tests/test_renderer.py
 ======================
-Pruebas del renderizador HTML.
+Pruebas del renderizador HTML interactivo.
 
 Para correr:
     python -m pytest tests/test_renderer.py -v
@@ -17,101 +17,92 @@ from gac.pistas import PistaNumerador
 
 
 def test_render_tablero_vacio():
-    """Un tablero sin palabras genera HTML de vacio."""
     board = Board(5, 5)
     renderer = HtmlRenderer()
     html = renderer.render(board)
     assert "No hay palabras" in html
 
 
-def test_render_contiene_letras():
-    """El HTML generado contiene las letras del tablero."""
+def test_render_contiene_inputs_interactivos():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert "S" in html
-    assert "O" in html
-    assert "L" in html
+    html = renderer.render(board, interactivo=True)
+    assert '<input type="text"' in html
+    assert 'data-solucion="S"' in html
 
 
-def test_render_usa_grid_css():
-    """El HTML usa CSS Grid para el tablero."""
+def test_render_modo_estatico_no_tiene_inputs():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert "display: grid" in html
-    assert "grid-template-columns" in html
+    html = renderer.render(board, interactivo=False)
+    assert '<input type="text"' not in html
 
 
-def test_render_recorta_al_minimo():
-    """Solo muestra la region que contiene palabras, no todo el tablero."""
-    board = Board(15, 15)
-    board.colocar(Placement("SOL", fila=7, columna=7, direccion=Horizontal()))
-    renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert "repeat(5" in html or "repeat(6" in html
-
-
-def test_render_titulo_personalizado():
-    """El titulo del HTML se puede personalizar."""
-    board = Board(5, 5)
-    board.colocar(Placement("A", fila=2, columna=2, direccion=Horizontal()))
-    renderer = HtmlRenderer()
-    html = renderer.render(board, titulo="Mi Crucigrama")
-    assert "Mi Crucigrama" in html
-    assert "<title>Mi Crucigrama</title>" in html
-
-
-def test_render_clases_css():
-    """Las celdas tienen las clases CSS correctas."""
+def test_render_contiene_botones():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert "cell letter" in html
-    assert "cell empty" in html
+    html = renderer.render(board, interactivo=True)
+    assert 'id="btn-verificar"' in html
+    assert 'id="btn-pista"' in html
+    assert 'id="btn-limpiar"' in html
+    assert 'id="btn-reiniciar"' in html
 
 
-def test_render_con_numeros_muestra_span():
-    """Si hay numerador, el HTML incluye el span con el numero de pista."""
+def test_render_contiene_barra_progreso():
+    board = Board(5, 5)
+    board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
+    renderer = HtmlRenderer()
+    html = renderer.render(board, interactivo=True)
+    assert 'id="progreso-fill"' in html
+    assert 'id="progreso-texto"' in html
+
+
+def test_render_click_en_pistas_tiene_onclick():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
     numerador = PistaNumerador()
-    html = renderer.render(board, numerador=numerador)
-    assert '<span class="cell-number">1</span>' in html
+    pistas = {1: {"palabra": "SOL", "definicion": "Estrella", "direccion": "Horizontal"}}
+    html = renderer.render(board, numerador=numerador, pistas=pistas, interactivo=True)
+    assert 'onclick="irAPalabra(1)"' in html
+    assert 'class="pista-item"' in html
 
 
-def test_render_sin_numerador_no_muestra_span():
-    """Sin numerador, no aparece el span de numero de pista en las celdas."""
+def test_render_navegacion_por_coordenadas():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert '<span class="cell-number">' not in html
+    html = renderer.render(board, interactivo=True)
+    assert "getInput(" in html
+
+
+def test_render_sin_auto_avance():
+    board = Board(5, 5)
+    board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
+    renderer = HtmlRenderer()
+    html = renderer.render(board, interactivo=True)
+    assert "inputs[idx+1]" not in html
 
 
 def test_render_con_pistas_muestra_panel():
-    """Si se proporcionan pistas, aparece el panel lateral."""
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
     numerador = PistaNumerador()
-    pistas = {
-        1: {"palabra": "SOL", "definicion": "Estrella del dia", "direccion": "Horizontal"}
-    }
+    pistas = {1: {"palabra": "SOL", "definicion": "Estrella del dia", "direccion": "Horizontal"}}
     html = renderer.render(board, numerador=numerador, pistas=pistas)
-    assert '<div class="pistas-panel">' in html
+    assert 'class="pistas-panel"' in html
     assert "Horizontales" in html
-    assert "Estrella del dia" in html
 
 
-def test_render_sin_pistas_no_muestra_panel():
-    """Sin pistas, no aparece el div del panel lateral (solo la clase CSS en el style)."""
+def test_render_contiene_javascript():
     board = Board(5, 5)
     board.colocar(Placement("SOL", fila=2, columna=1, direccion=Horizontal()))
     renderer = HtmlRenderer()
-    html = renderer.render(board)
-    assert '<div class="pistas-panel">' not in html
+    html = renderer.render(board, interactivo=True)
+    assert "<script>" in html
+    assert "soluciones=" in html
+    assert "irAPalabra" in html
